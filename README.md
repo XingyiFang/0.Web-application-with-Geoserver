@@ -5,5 +5,7 @@
 3. You can serve html files in GeoServer by placing them in the www subdirectory in your GeoServer's data directory
 4. Create a folder for your project, and put your files in this folder
 5. Let's start...
-6. Finally, you can access your application --- localhost:8080/geoserver/www/[project folder]/index.html
+6. Publish your data 
+
+7. Finally, you can access your application --- localhost:8080/geoserver/www/[project folder]/index.html
 
