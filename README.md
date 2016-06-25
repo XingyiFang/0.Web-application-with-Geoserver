@@ -1,4 +1,4 @@
-# simple web mapping application from scratch by using geoserver
+# Simple web mapping application from scratch by using geoserver
 
 1. Install geoserver, PostgreSQL/PostGIS
 2. Go to your "GeoServer/data_dir/www" directory
