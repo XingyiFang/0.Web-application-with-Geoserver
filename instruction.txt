@@ -1,3 +1,4 @@
+@check the javascript in the index.html
 @install postgis extension
 1. download data, and create table in the postgresql/PostGIS database.
 2. -- Table: twitter
