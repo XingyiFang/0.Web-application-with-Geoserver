@@ -1,1 +1,434 @@
-<html><head><title>Testbed</title>    <script type="text/javascript" src="http://cdn.sencha.com/ext/gpl/3.4.1.1/adapter/ext/ext-base.js"></script>    <script type="text/javascript" src="http://cdn.sencha.com/ext/gpl/3.4.1.1/ext-all.js"></script>	<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>    <link rel="stylesheet" type="text/css" href="http://cdn.sencha.com/ext/gpl/3.4.1.1/resources/css/ext-all.css" />    <link rel="stylesheet" type="text/css" href="http://cdn.sencha.com/ext/gpl/3.4.1.1/examples/shared/examples.css" />	    <!-- OpenLayers Script -->    <script src="http://www.openlayers.org/api/2.12/OpenLayers.js"></script>	<script src="http://maps.google.com/maps/api/js?v=3&amp;sensor=false"></script>    <!-- GeoExt Script -->    <script type="text/javascript" src="http://api.geoext.org/1.1/script/GeoExt.js"></script>	<script type="text/javascript">		// base map layer		var layer = new OpenLayers.Layer.OSM();		//state 		var states = new OpenLayers.Layer.WMS(		"States, USA - Population",		"http://localhost:8080/geoserver/wms",		{layers:'usa:states',		format: 'image/png',		transparent: true}, {isBaseLayer: false, opacity: 0.7}		);		//spatial query		var state_spatial = new OpenLayers.Layer.WMS(		"Spatial Query (within)",		"http://localhost:8080/geoserver/wms",		{layers:'twitter:test_points',		format: 'image/png',		transparent: true}, {isBaseLayer: false, opacity: 0.7, visibility: false}		);		//layer for "select by states" function		var statesby = new OpenLayers.Layer.WMS(		"Select by states",		"http://localhost:8080/geoserver/wms",		{layers:'twitter:selectbystate',		format: 'image/png',		transparent: true}, {isBaseLayer: false, opacity: 0.7, visibility: false}		);			//layer for "select by date" function		var dateby = new OpenLayers.Layer.WMS(		"Select by date",		"http://localhost:8080/geoserver/wms",		{layers:'twitter:selectbydate',		format: 'image/png',		transparent: true}, {isBaseLayer: false, opacity: 0.7, visibility: false}		);			//layer (50000 samples) for "click infomation" function		var twitter_click = new OpenLayers.Layer.WMS("Twitter Data(click)",		  // Uncomment below to use your local server		  "http://localhost:8080/geoserver/wms",		  {			format: "image/png8",			transparent: true,			layers: "opengeo:twitter_50000",		  }, {			opacity: 0.6,			isBaseLayer: false,		  });		// Use this word on startup		var startWord = "obama";		// Heat map + point map, just select 50000 sample points		var twitter50000 = new OpenLayers.Layer.WMS("Twitter Data(heat map)",		  "http://localhost:8080/geoserver/wms",		  {			format: "image/png8",			transparent: true,			layers: "opengeo:buffertwittersample,opengeo:buffertwittersample",			styles: "point,heatmap"		  }, {			opacity: 0.6,			singleTile: true,			visibility: false		  });				// Start with map of startWord		twitter50000.mergeNewParams({viewparams: "word:"+startWord});		var textField = new Ext.form.TextField({		  value: startWord,		  listeners: {			specialkey: function(field, e) {			  // Only update the word map when user hits 'enter'			  if (e.getKey() == e.ENTER) {				twitter50000.mergeNewParams({viewparams: "word:"+field.getValue()});			  }			}		  }		});				//spatial query, input state abbr.		var textField_st = new Ext.form.TextField({		  value: 'VA',		  listeners: {			specialkey: function(field, e) {			  // Only update the word map when user hits 'enter'			  if (e.getKey() == e.ENTER) {				state_spatial.mergeNewParams({viewparams: "word:"+field.getValue()});			  }			}		  }		});						// create the combo instance --- date		var comboField = new Ext.form.ComboBox(			{				store:  new Ext.data.SimpleStore(							{								fields: ['datetoday'],								data:[										['2013-09-20'],										['2013-09-21'],										['2013-09-22'],										['2013-09-23'],										['2013-09-24'],										['2013-09-25'],										['2013-09-26'],										['2013-09-27'],										['2013-09-28'],										['2013-09-29'],										['2013-09-30'],										['2013-10-01'],										['2013-10-02'],										['2013-10-03'],										['2013-10-04'],										['2013-10-05'],										['2013-10-06'],										['2013-10-07'],										['2013-10-08'],										['2013-10-09'],										['2013-10-10'],										['2013-10-11'],										['2013-10-12'],										['2013-10-13'],										['2013-10-14'],										['2013-10-15'],										['2013-10-16'],										['2013-10-17'],										['2013-10-18'],										['2013-10-19'],										['2013-10-20'],										['2013-10-21'],										['2013-10-22'],										['2013-10-23'],										['2013-10-24']									]								}),				id:     'selection1',				fieldLabel:      'Select Option',				displayField:    'datetoday',				typeAhead:        true,				mode:             'local',				emptyText : '2013-09-20',				triggerAction:    'all',				selectOnFocus:    true,				allowBlank:       false,				anchor:            '75%',				listeners: {					// public event function here					'select': function(field){						dateby.mergeNewParams({viewparams: "word2:"+field.getValue().replace(/-/g ,' ')});						//alert(field.getValue().replace(/-/g ,' ')); this is a bug?!						}				}			});				// create the combo instance --- states		var comboField_st = new Ext.form.ComboBox(			{				store:  new Ext.data.SimpleStore(							{								fields: ['states'],								data:[										['al'],										['ak'],										['az'],										['ar'],										['as'],										['ca'],										['co'],										['ct'],										['dc'],										['de'],										['fl'],										['ga'],										['gu'],										['hi'],										['id'],										['il'],										['in'],										['ia'],										['ks'],										['ky'],										['la'],										['me'],										['md'],										['ma'],										['mi'],										['mn'],										['ms'],										['mo'],										['mt'],										['mp'],										['ne'],										['nv'],										['nh'],										['nj'],										['nm'],										['ny'],										['nc'],										['nd'],										['oh'],										['ok'],										['or'],										['pa'],										['pr'],										['ri'],										['sc'],										['sd'],										['tn'],										['tx'],										['ut'],										['vt'],										['va'],										['vi'],										['wa'],										['wv'],										['wi'],										['wy']									]								}),				id:     'selection2',				fieldLabel:      'Select Option',				displayField:    'states',				typeAhead:        true,				mode:             'local',				triggerAction:    'all',				selectOnFocus:    true,				allowBlank:       false,				emptyText : 		'va',				anchor:            '75%',				listeners: {					// public event function here					'select': function(field){						statesby.mergeNewParams({viewparams: "word:"+field.getValue()});						}				}			});				//-------------------------------------------------------------------------		// click info functionality		//-------------------------------------------------------------------------		var queryableMapLayers = [];		var popup;		var ids = [];		var popupid = [];		click_info = new OpenLayers.Control.WMSGetFeatureInfo({				url: 'http://localhost:8080/geoserver/wms',                 title: 'Identify features by clicking',				autoActivate: true,				queryVisible: true,				infoFormat: "application/vnd.ogc.gml",				layers: queryableMapLayers,				eventListeners: {					"getfeatureinfo": function(e) {												$.each(popupid, function(index, value) {							$("#"+value).html('');						});						popupid = [];						var items = [];											Ext.each(e.features, function(feature) {							items.push({								xtype: "propertygrid",								title: feature.attributes.author,								source: feature.attributes							});						});											popup = new GeoExt.Popup({							title: "Feature Info",							width: 200,							height: 300,							layout: "accordion",							map: viewPort.mapPanel.map,							location: e.xy,							items: items,						}).show();													$("[id*=ext-comp-]").each(function(){							var found = jQuery.inArray($(this).attr('id'), ids);							if (found >= 0){															}else{								popupid.push($(this).attr('id'))							}						});					}				}			});		//-------------------------------------------------------------------------		// GeoEXT Viewport		//-------------------------------------------------------------------------		var viewPort, items = [], controls = [];		Ext.onReady(function() {			viewPort = new Ext.Viewport({				layout: "border",				items: items			});			$("[id*=ext-comp-]").each(function(){				ids.push($(this).attr('id'));			});			$('.x-tree-node-cb').attr('type', 'checkbox');			//$('#ext-gen37').css('border', '1px solid black'); 			//$('#ext-gen48').css('border', '1px solid black'); 		});						// MapPanel 		items.push({			title: 'A Simple GeoExt Map v3',			xtype: "gx_mappanel",			ref: "mapPanel",			region: "center",			height: 400,			width: 600,			tbar: ["Enter a word to map:", textField, "| Select by Day:", comboField, "| Select by State:", comboField_st,"| Spatial Query, within 220km of specified state", textField_st],			map: {				projection: new OpenLayers.Projection("EPSG:900913"),				displayProjection: new OpenLayers.Projection("EPSG:4326"),				units: "m",				numZoomLevels: 19,				controls: controls,				center: new OpenLayers.LonLat(-11163575.09, 4784383.33)			},			zoom: 4,			layers: [layer,states,statesby,dateby,twitter_click,twitter50000,state_spatial],		});				// Layer selection grid (bottom)		items.push({			xtype: "grid",			ref: "capsGrid", 			title: "Available Layers",			region: "south",			collapsible: true,            collapseMode: "mini",			height: 220,			viewConfig: {forceFit: true},			store: new GeoExt.data.WMSCapabilitiesStore({				url: "http://localhost:8080/geoserver/wms?SERVICE=WMS&REQUEST=GetCapabilities&VERSION=1.1.1",				autoLoad: true			}),			columns: [				{header: "Name", dataIndex: "name", sortable: true},				{header: "Title", dataIndex: "title", sortable: true},				{header: "Abstract", dataIndex: "abstract"}			],			tbar: [{				text: "Add to Map",				handler: function() {					viewPort.capsGrid.getSelectionModel().each(function(record) {						var clone = record.clone();						clone.getLayer().mergeNewParams({							format: "image/png",							transparent: true						});						viewPort.mapPanel.layers.add(clone);					});				}			}]		}); 		// Tree view of layers (Left)		items.push({			xtype: "treepanel",			ref: "tree",			region: "west",			title: "Layers",			width: 200,			autoScroll: true,			enableDD: true,			collapsible: true,            collapseMode: "mini",			root: new GeoExt.tree.LayerContainer({				text: 'All Layers',				expanded: true				}),			tbar: [{				text: "Add select layer to query layers!",				handler: function() {					var node = viewPort.tree.getSelectionModel().getSelectedNode();					if (node && node.layer instanceof OpenLayers.Layer.WMS) {						queryableMapLayers.push(node.layer);					}				}			}]		});				//Legend (Right)		var legendPanel = new GeoExt.LegendPanel({			defaults: {				labelCls: 'mylabel',				style: 'padding:5px'			},			bodyStyle: 'padding:5px',			title: "Legend",			width: 180,			autoScroll: true,			region: 'east'		});		items.push(legendPanel);						// Openlayer map controls 		controls.push(			new OpenLayers.Control.Navigation(), //mouse panning			new OpenLayers.Control.PanPanel(), 			new OpenLayers.Control.ZoomPanel(),				new OpenLayers.Control.MousePosition({                    prefix: '<a target="_blank" ' +                        'href="http://spatialreference.org/ref/epsg/4326/">' +                        'EPSG:4326</a> coordinates: ',                    separator: ' | ',                    numDigits: 2,                    emptyString: 'Mouse is not over map.'                }), //mouse position			click_info		);					</script></head><body><div id="gxmap"></div></body></html>
+<html>
+<head>
+<title>Testbed</title>
+    <script type="text/javascript" src="http://cdn.sencha.com/ext/gpl/3.4.1.1/adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="http://cdn.sencha.com/ext/gpl/3.4.1.1/ext-all.js"></script>
+	<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="http://cdn.sencha.com/ext/gpl/3.4.1.1/resources/css/ext-all.css" />
+    <link rel="stylesheet" type="text/css" href="http://cdn.sencha.com/ext/gpl/3.4.1.1/examples/shared/examples.css" />
+	
+    <!-- OpenLayers Script -->
+    <script src="http://www.openlayers.org/api/2.12/OpenLayers.js"></script>
+	<script src="http://maps.google.com/maps/api/js?v=3&amp;sensor=false"></script>
+    <!-- GeoExt Script -->
+    <script type="text/javascript" src="http://api.geoext.org/1.1/script/GeoExt.js"></script>
+
+	<script type="text/javascript">
+		// base map layer
+		var layer = new OpenLayers.Layer.OSM();
+		//state 
+		var states = new OpenLayers.Layer.WMS(
+		"States, USA - Population",
+		"http://localhost:8080/geoserver/wms",
+		{layers:'usa:states',
+		format: 'image/png',
+		transparent: true}, {isBaseLayer: false, opacity: 0.7}
+		);
+		//spatial query
+		var state_spatial = new OpenLayers.Layer.WMS(
+		"Spatial Query (within)",
+		"http://localhost:8080/geoserver/wms",
+		{layers:'twitter:test_points',
+		format: 'image/png',
+		transparent: true}, {isBaseLayer: false, opacity: 0.7, visibility: false}
+		);
+		//layer for "select by states" function
+		var statesby = new OpenLayers.Layer.WMS(
+		"Select by states",
+		"http://localhost:8080/geoserver/wms",
+		{layers:'twitter:selectbystate',
+		format: 'image/png',
+		transparent: true}, {isBaseLayer: false, opacity: 0.7, visibility: false}
+		);	
+		//layer for "select by date" function
+		var dateby = new OpenLayers.Layer.WMS(
+		"Select by date",
+		"http://localhost:8080/geoserver/wms",
+		{layers:'twitter:selectbydate',
+		format: 'image/png',
+		transparent: true}, {isBaseLayer: false, opacity: 0.7, visibility: false}
+		);	
+		//layer (50000 samples) for "click infomation" function
+		var twitter_click = new OpenLayers.Layer.WMS("Twitter Data(click)",
+		  // Uncomment below to use your local server
+		  "http://localhost:8080/geoserver/wms",
+		  {
+			format: "image/png8",
+			transparent: true,
+			layers: "opengeo:twitter_50000",
+		  }, {
+			opacity: 0.6,
+			isBaseLayer: false,
+		  });
+		// Use this word on startup
+		var startWord = "obama";
+		// Heat map + point map, just select 50000 sample points
+		var twitter50000 = new OpenLayers.Layer.WMS("Twitter Data(heat map)",
+		  "http://localhost:8080/geoserver/wms",
+		  {
+			format: "image/png8",
+			transparent: true,
+			layers: "opengeo:buffertwittersample,opengeo:buffertwittersample",
+			styles: "point,heatmap"
+		  }, {
+			opacity: 0.6,
+			singleTile: true,
+			visibility: false
+		  });		
+		// Start with map of startWord
+		twitter50000.mergeNewParams({viewparams: "word:"+startWord});
+		var textField = new Ext.form.TextField({
+		  value: startWord,
+		  listeners: {
+			specialkey: function(field, e) {
+			  // Only update the word map when user hits 'enter'
+			  if (e.getKey() == e.ENTER) {
+				twitter50000.mergeNewParams({viewparams: "word:"+field.getValue()});
+			  }
+			}
+		  }
+		});
+		
+		//spatial query, input state abbr.
+		var textField_st = new Ext.form.TextField({
+		  value: 'VA',
+		  listeners: {
+			specialkey: function(field, e) {
+			  // Only update the word map when user hits 'enter'
+			  if (e.getKey() == e.ENTER) {
+				state_spatial.mergeNewParams({viewparams: "word:"+field.getValue()});
+			  }
+			}
+		  }
+		});
+				
+		// create the combo instance --- date
+		var comboField = new Ext.form.ComboBox(
+			{
+				store:  new Ext.data.SimpleStore(
+							{
+								fields: ['datetoday'],
+								data:[
+										['2013-09-20'],
+										['2013-09-21'],
+										['2013-09-22'],
+										['2013-09-23'],
+										['2013-09-24'],
+										['2013-09-25'],
+										['2013-09-26'],
+										['2013-09-27'],
+										['2013-09-28'],
+										['2013-09-29'],
+										['2013-09-30'],
+										['2013-10-01'],
+										['2013-10-02'],
+										['2013-10-03'],
+										['2013-10-04'],
+										['2013-10-05'],
+										['2013-10-06'],
+										['2013-10-07'],
+										['2013-10-08'],
+										['2013-10-09'],
+										['2013-10-10'],
+										['2013-10-11'],
+										['2013-10-12'],
+										['2013-10-13'],
+										['2013-10-14'],
+										['2013-10-15'],
+										['2013-10-16'],
+										['2013-10-17'],
+										['2013-10-18'],
+										['2013-10-19'],
+										['2013-10-20'],
+										['2013-10-21'],
+										['2013-10-22'],
+										['2013-10-23'],
+										['2013-10-24']
+									]
+								}),
+				id:     'selection1',
+				fieldLabel:      'Select Option',
+				displayField:    'datetoday',
+				typeAhead:        true,
+				mode:             'local',
+				emptyText : '2013-09-20',
+				triggerAction:    'all',
+				selectOnFocus:    true,
+				allowBlank:       false,
+				anchor:            '75%',
+				listeners: {
+					// public event function here
+					'select': function(field){
+						dateby.mergeNewParams({viewparams: "word2:"+field.getValue().replace(/-/g ,' ')});
+						//alert(field.getValue().replace(/-/g ,' ')); this is a bug?!
+						}
+				}
+			});		
+		// create the combo instance --- states
+		var comboField_st = new Ext.form.ComboBox(
+			{
+				store:  new Ext.data.SimpleStore(
+							{
+								fields: ['states'],
+								data:[
+										['al'],
+										['ak'],
+										['az'],
+										['ar'],
+										['as'],
+										['ca'],
+										['co'],
+										['ct'],
+										['dc'],
+										['de'],
+										['fl'],
+										['ga'],
+										['gu'],
+										['hi'],
+										['id'],
+										['il'],
+										['in'],
+										['ia'],
+										['ks'],
+										['ky'],
+										['la'],
+										['me'],
+										['md'],
+										['ma'],
+										['mi'],
+										['mn'],
+										['ms'],
+										['mo'],
+										['mt'],
+										['mp'],
+										['ne'],
+										['nv'],
+										['nh'],
+										['nj'],
+										['nm'],
+										['ny'],
+										['nc'],
+										['nd'],
+										['oh'],
+										['ok'],
+										['or'],
+										['pa'],
+										['pr'],
+										['ri'],
+										['sc'],
+										['sd'],
+										['tn'],
+										['tx'],
+										['ut'],
+										['vt'],
+										['va'],
+										['vi'],
+										['wa'],
+										['wv'],
+										['wi'],
+										['wy']
+									]
+								}),
+				id:     'selection2',
+				fieldLabel:      'Select Option',
+				displayField:    'states',
+				typeAhead:        true,
+				mode:             'local',
+				triggerAction:    'all',
+				selectOnFocus:    true,
+				allowBlank:       false,
+				emptyText : 		'va',
+				anchor:            '75%',
+				listeners: {
+					// public event function here
+					'select': function(field){
+						statesby.mergeNewParams({viewparams: "word:"+field.getValue()});
+						}
+				}
+			});
+		
+		//-------------------------------------------------------------------------
+		// click info functionality
+		//-------------------------------------------------------------------------
+		var queryableMapLayers = [];
+		var popup;
+		var ids = [];
+		var popupid = [];
+		click_info = new OpenLayers.Control.WMSGetFeatureInfo({
+				url: 'http://localhost:8080/geoserver/wms', 
+                title: 'Identify features by clicking',
+				autoActivate: true,
+				queryVisible: true,
+				infoFormat: "application/vnd.ogc.gml",
+				layers: queryableMapLayers,
+				eventListeners: {
+					"getfeatureinfo": function(e) {						
+						$.each(popupid, function(index, value) {
+							$("#"+value).html('');
+						});
+						popupid = [];
+						var items = [];					
+						Ext.each(e.features, function(feature) {
+							items.push({
+								xtype: "propertygrid",
+								title: feature.attributes.author,
+								source: feature.attributes
+							});
+						});					
+						popup = new GeoExt.Popup({
+							title: "Feature Info",
+							width: 200,
+							height: 300,
+							layout: "accordion",
+							map: viewPort.mapPanel.map,
+							location: e.xy,
+							items: items,
+						}).show();							
+						$("[id*=ext-comp-]").each(function(){
+							var found = jQuery.inArray($(this).attr('id'), ids);
+							if (found >= 0){
+								
+							}else{
+								popupid.push($(this).attr('id'))
+							}
+						});
+					}
+				}
+			});
+
+		//-------------------------------------------------------------------------
+		// GeoEXT Viewport
+		//-------------------------------------------------------------------------
+		var viewPort, items = [], controls = [];
+		Ext.onReady(function() {
+			viewPort = new Ext.Viewport({
+				layout: "border",
+				items: items
+			});
+			$("[id*=ext-comp-]").each(function(){
+				ids.push($(this).attr('id'));
+			});
+			$('.x-tree-node-cb').attr('type', 'checkbox');
+			//$('#ext-gen37').css('border', '1px solid black'); 
+			//$('#ext-gen48').css('border', '1px solid black'); 
+		});
+				
+		// MapPanel 
+		items.push({
+			title: 'A Simple GeoExt Map v3',
+			xtype: "gx_mappanel",
+			ref: "mapPanel",
+			region: "center",
+			height: 400,
+			width: 600,
+			tbar: ["Enter a word to map:", textField, "| Select by Day:", comboField, "| Select by State:", comboField_st,"| Spatial Query, within 220km of specified state", textField_st],
+			map: {
+				projection: new OpenLayers.Projection("EPSG:900913"),
+				displayProjection: new OpenLayers.Projection("EPSG:4326"),
+				units: "m",
+				numZoomLevels: 19,
+				controls: controls,
+				center: new OpenLayers.LonLat(-11163575.09, 4784383.33)
+			},
+			zoom: 4,
+			layers: [layer,states,statesby,dateby,twitter_click,twitter50000,state_spatial],
+		});
+		
+		// Layer selection grid (bottom)
+		items.push({
+			xtype: "grid",
+			ref: "capsGrid", 
+			title: "Available Layers",
+			region: "south",
+			collapsible: true,
+            collapseMode: "mini",
+			height: 220,
+			viewConfig: {forceFit: true},
+			store: new GeoExt.data.WMSCapabilitiesStore({
+				url: "http://localhost:8080/geoserver/wms?SERVICE=WMS&REQUEST=GetCapabilities&VERSION=1.1.1",
+				autoLoad: true
+			}),
+			columns: [
+				{header: "Name", dataIndex: "name", sortable: true},
+				{header: "Title", dataIndex: "title", sortable: true},
+				{header: "Abstract", dataIndex: "abstract"}
+			],
+			tbar: [{
+				text: "Add to Map",
+				handler: function() {
+					viewPort.capsGrid.getSelectionModel().each(function(record) {
+						var clone = record.clone();
+						clone.getLayer().mergeNewParams({
+							format: "image/png",
+							transparent: true
+						});
+						viewPort.mapPanel.layers.add(clone);
+					});
+				}
+			}]
+		}); 
+
+		// Tree view of layers (Left)
+		items.push({
+			xtype: "treepanel",
+			ref: "tree",
+			region: "west",
+			title: "Layers",
+			width: 200,
+			autoScroll: true,
+			enableDD: true,
+			collapsible: true,
+            collapseMode: "mini",
+			root: new GeoExt.tree.LayerContainer({
+				text: 'All Layers',
+				expanded: true
+				}),
+			tbar: [{
+				text: "Add select layer to query layers!",
+				handler: function() {
+					var node = viewPort.tree.getSelectionModel().getSelectedNode();
+					if (node && node.layer instanceof OpenLayers.Layer.WMS) {
+						queryableMapLayers.push(node.layer);
+					}
+				}
+			}]
+		});
+		
+		//Legend (Right)
+		var legendPanel = new GeoExt.LegendPanel({
+			defaults: {
+				labelCls: 'mylabel',
+				style: 'padding:5px'
+			},
+			bodyStyle: 'padding:5px',
+			title: "Legend",
+			width: 180,
+			autoScroll: true,
+			region: 'east'
+		});
+		items.push(legendPanel);
+				
+		// Openlayer map controls 
+		controls.push(
+			new OpenLayers.Control.Navigation(), //mouse panning
+			new OpenLayers.Control.PanPanel(), 
+			new OpenLayers.Control.ZoomPanel(),	
+			new OpenLayers.Control.MousePosition({
+                    prefix: '<a target="_blank" ' +
+                        'href="http://spatialreference.org/ref/epsg/4326/">' +
+                        'EPSG:4326</a> coordinates: ',
+                    separator: ' | ',
+                    numDigits: 2,
+                    emptyString: 'Mouse is not over map.'
+                }), //mouse position
+			click_info
+		);
+		
+		
+	</script>
+
+</head>
+<body>
+<div id="gxmap"></div>
+</body>
+</html>
